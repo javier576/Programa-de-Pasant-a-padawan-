@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:formulario/screens/login_screen.dart';
 import '../components/custom_input.dart';
 import '../components/custom_button.dart';
@@ -41,7 +42,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
       context: context,
       initialDate: DateTime(2000),
       firstDate: DateTime(1900),
-      lastDate: DateTime.now(),
+      lastDate: DateTime(
+        DateTime.now().year - 13,
+        DateTime.now().month,
+        DateTime.now().day,
+      ),
     );
     if (picked != null) {
       setState(() {
@@ -83,6 +88,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
       return;
     }
 
+    // nombre
+    List<String> partes = name.split(" ");
+    if (partes.length < 2 || partes.any((parte) => parte.length < 3)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Ingresa tu nombre completo (nombre y apellido)"),
+        ),
+      );
+      return;
+    }
     setState(() => isLoading = true);
 
     try {
@@ -145,7 +160,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               CustomInput(hint: "Correo", controller: emailController),
               const SizedBox(height: 16),
               // Nombre
-              CustomInput(hint: "Nombre", controller: nameController),
+              CustomInput(hint: "Nombre Completo", controller: nameController),
               const SizedBox(height: 16),
 
               //Fecha de nacimiento
@@ -188,6 +203,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 controller: telefonoController,
                 keyboardType: TextInputType.number,
                 maxLength: phoneMaxLength,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 decoration: InputDecoration(
                   labelText: "Teléfono",
                   prefixText: "$phonePrefix ",
