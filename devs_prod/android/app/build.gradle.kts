@@ -43,12 +43,12 @@ android {
 productFlavors {
     create("dev") {
         dimension = "default"
-        applicationIdSuffix = ".dev"   // Queda: com.example.formulario.dev
+        applicationIdSuffix = ".dev"   
         versionNameSuffix = "-dev"
     }
     create("prod") {
         dimension = "default"
-        // Producción: sin sufijos, usa el applicationId base
+        
     }
 }
 }
