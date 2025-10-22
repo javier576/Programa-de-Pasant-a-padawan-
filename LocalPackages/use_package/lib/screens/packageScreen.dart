@@ -10,86 +10,86 @@ class Packagescreen extends StatefulWidget {
 }
 
 class _PackagescreenState extends State<Packagescreen> {
-  List<String> _operacion = [];
-  String _numeroActual = '0';
-  String _displayString = '0';
-  Calculadora _calculator = Calculadora();
-  bool _mostrandoHistorial = false;
-  String _historialFormateado = '';
-  bool _esResultadoOError = false;
+  List<String> operacion = [];
+  String numeroActual = '0';
+  String displayString = '0';
+  Calculadora calculator = Calculadora();
+  bool mostrandoHistorial = false;
+  String historialFormateado = '';
+  bool esResultadoOError = false;
 
-  void _presionarNumero(String digito) {
+  void presionarNumero(String digito) {
     setState(() {
-      _mostrandoHistorial = false;
-      if (_esResultadoOError) {
-        _numeroActual = digito;
-        _displayString = digito;
-        _esResultadoOError = false;
+      mostrandoHistorial = false;
+      if (esResultadoOError) {
+        numeroActual = digito;
+        displayString = digito;
+        esResultadoOError = false;
       } else {
-        if (_numeroActual == '0') _numeroActual = '';
-        if (_displayString == '0') _displayString = '';
-        _numeroActual += digito;
-        _displayString += digito;
+        if (numeroActual == '0') numeroActual = '';
+        if (displayString == '0') displayString = '';
+        numeroActual += digito;
+        displayString += digito;
       }
     });
   }
 
-  void _presionarOperador(String op) {
+  void presionarOperador(String op) {
     setState(() {
-      _mostrandoHistorial = false;
-      if (_esResultadoOError) {
-        _esResultadoOError = false;
+      mostrandoHistorial = false;
+      if (esResultadoOError) {
+        esResultadoOError = false;
       }
-      if (_numeroActual.isEmpty && _operacion.isNotEmpty) {
+      if (numeroActual.isEmpty && operacion.isNotEmpty) {
         return;
       }
-      _operacion.add(_numeroActual);
-      _operacion.add(op);
-      _numeroActual = '';
-      _displayString += op;
+      operacion.add(numeroActual);
+      operacion.add(op);
+      numeroActual = '';
+      displayString += op;
     });
   }
 
-  void _presionarIgual() {
+  void presionarIgual() {
     setState(() {
-      _mostrandoHistorial = false;
-      if (_numeroActual.isEmpty || _operacion.isEmpty) return;
-      _operacion.add(_numeroActual);
+      mostrandoHistorial = false;
+      if (numeroActual.isEmpty || operacion.isEmpty) return;
+      operacion.add(numeroActual);
 
       try {
-        double result = _calculator.operacionesmultiples(_operacion);
-        _displayString = result.toString();
-        _numeroActual = result.toString();
+        double result = calculator.operacionesmultiples(operacion);
+        displayString = result.toString();
+        numeroActual = result.toString();
       } catch (e) {
-        _displayString = 'Error';
-        _numeroActual = '0';
+        displayString = 'Error';
+        numeroActual = '0';
       }
-      _operacion.clear();
-      _esResultadoOError = true;
+      operacion.clear();
+      esResultadoOError = true;
     });
   }
 
-  void _presionarHistorial() {
+  void presionarHistorial() {
     setState(() {
-      if (_mostrandoHistorial) {
-        _mostrandoHistorial = false;
+      if (mostrandoHistorial) {
+        mostrandoHistorial = false;
       } else {
-        _historialFormateado = _calculator.historial.join('\n');
-        if (_historialFormateado.isEmpty) {
-          _historialFormateado = 'No hay historial';
+        historialFormateado = calculator.historial.join('\n');
+        if (historialFormateado.isEmpty) {
+          historialFormateado = 'No hay historial';
         }
-        _mostrandoHistorial = true;
+        mostrandoHistorial = true;
       }
     });
   }
 
-  void _limpiarTodo() {
+  void limpiarTodo() {
     setState(() {
-      _numeroActual = '0';
-      _displayString = '0';
-      _operacion.clear();
-      _mostrandoHistorial = false;
-      _esResultadoOError = false;
+      numeroActual = '0';
+      displayString = '0';
+      operacion.clear();
+      mostrandoHistorial = false;
+      esResultadoOError = false;
     });
   }
 
@@ -103,13 +103,13 @@ class _PackagescreenState extends State<Packagescreen> {
               width: double.infinity,
               color: Colors.grey[200],
               padding: const EdgeInsets.all(24),
-              alignment: _mostrandoHistorial
+              alignment: mostrandoHistorial
                   ? Alignment.topLeft
                   : Alignment.centerRight,
-              child: _mostrandoHistorial
+              child: mostrandoHistorial
                   ? SingleChildScrollView(
                       child: Text(
-                        _historialFormateado,
+                        historialFormateado,
                         style: const TextStyle(
                           color: Colors.black87,
                           fontSize: 24,
@@ -121,7 +121,7 @@ class _PackagescreenState extends State<Packagescreen> {
                       scrollDirection: Axis.horizontal,
                       reverse: true,
                       child: Text(
-                        _displayString,
+                        displayString,
                         style: const TextStyle(
                           color: Colors.black,
                           fontSize: 56,
@@ -149,12 +149,12 @@ class _PackagescreenState extends State<Packagescreen> {
                         icon: Text('C'),
                         color: Colors.white,
                         backgroundColor: Colors.redAccent,
-                        onPressed: _limpiarTodo,
+                        onPressed: limpiarTodo,
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: IconButton(
-                          onPressed: _presionarHistorial,
+                          onPressed: presionarHistorial,
                           icon: Icon(Icons.access_time),
                           color: Colors.white,
                           iconSize: 65,
@@ -169,25 +169,25 @@ class _PackagescreenState extends State<Packagescreen> {
                         icon: Text('7'),
                         color: Colors.white,
                         backgroundColor: Colors.blue,
-                        onPressed: () => _presionarNumero('7'),
+                        onPressed: () => presionarNumero('7'),
                       ),
                       Botones(
                         icon: Text('4'),
                         color: Colors.white,
                         backgroundColor: Colors.blue,
-                        onPressed: () => _presionarNumero('4'),
+                        onPressed: () => presionarNumero('4'),
                       ),
                       Botones(
                         icon: Text('1'),
                         color: Colors.white,
                         backgroundColor: Colors.blue,
-                        onPressed: () => _presionarNumero('1'),
+                        onPressed: () => presionarNumero('1'),
                       ),
                       Botones(
                         icon: Text('0'),
                         color: Colors.white,
                         backgroundColor: Colors.blue,
-                        onPressed: () => _presionarNumero('0'),
+                        onPressed: () => presionarNumero('0'),
                       ),
                     ],
                   ),
@@ -198,19 +198,19 @@ class _PackagescreenState extends State<Packagescreen> {
                         icon: Text('8'),
                         color: Colors.white,
                         backgroundColor: Colors.blue,
-                        onPressed: () => _presionarNumero('8'),
+                        onPressed: () => presionarNumero('8'),
                       ),
                       Botones(
                         icon: Text('5'),
                         color: Colors.white,
                         backgroundColor: Colors.blue,
-                        onPressed: () => _presionarNumero('5'),
+                        onPressed: () => presionarNumero('5'),
                       ),
                       Botones(
                         icon: Text('2'),
                         color: Colors.white,
                         backgroundColor: Colors.blue,
-                        onPressed: () => _presionarNumero('2'),
+                        onPressed: () => presionarNumero('2'),
                       ),
                       Botones(
                         icon: Text('.'),
@@ -218,8 +218,8 @@ class _PackagescreenState extends State<Packagescreen> {
                         backgroundColor: Colors.blue,
                         onPressed: () {
                           setState(() {
-                            if (!_numeroActual.contains('.')) {
-                              _presionarNumero('.');
+                            if (!numeroActual.contains('.')) {
+                              presionarNumero('.');
                             }
                           });
                         },
@@ -233,25 +233,25 @@ class _PackagescreenState extends State<Packagescreen> {
                         icon: Text('9'),
                         color: Colors.white,
                         backgroundColor: Colors.blue,
-                        onPressed: () => _presionarNumero('9'),
+                        onPressed: () => presionarNumero('9'),
                       ),
                       Botones(
                         icon: Text('6'),
                         color: Colors.white,
                         backgroundColor: Colors.blue,
-                        onPressed: () => _presionarNumero('6'),
+                        onPressed: () => presionarNumero('6'),
                       ),
                       Botones(
                         icon: Text('3'),
                         color: Colors.white,
                         backgroundColor: Colors.blue,
-                        onPressed: () => _presionarNumero('3'),
+                        onPressed: () => presionarNumero('3'),
                       ),
                       Botones(
                         icon: Text('='),
                         color: Colors.white,
                         backgroundColor: Colors.blueGrey,
-                        onPressed: _presionarIgual,
+                        onPressed: presionarIgual,
                       ),
                     ],
                   ),
@@ -262,25 +262,25 @@ class _PackagescreenState extends State<Packagescreen> {
                         icon: Text('/'),
                         color: Colors.white,
                         backgroundColor: Colors.blueGrey,
-                        onPressed: () => _presionarOperador('/'),
+                        onPressed: () => presionarOperador('/'),
                       ),
                       Botones(
                         icon: Text('*'),
                         color: Colors.white,
                         backgroundColor: Colors.blueGrey,
-                        onPressed: () => _presionarOperador('*'),
+                        onPressed: () => presionarOperador('*'),
                       ),
                       Botones(
                         icon: Text('+'),
                         color: Colors.white,
                         backgroundColor: Colors.blueGrey,
-                        onPressed: () => _presionarOperador('+'),
+                        onPressed: () => presionarOperador('+'),
                       ),
                       Botones(
                         icon: Text('-'),
                         color: Colors.white,
                         backgroundColor: Colors.blueGrey,
-                        onPressed: () => _presionarOperador('-'),
+                        onPressed: () => presionarOperador('-'),
                       ),
                     ],
                   ),

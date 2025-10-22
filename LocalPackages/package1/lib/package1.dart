@@ -64,66 +64,62 @@ class Calculadora {
     }
 
     //multiplicacion
-    while (operaciones.contains('*')) {
-      int index = operaciones.indexOf('*');
-      double n1 = double.parse(operaciones[index - 1]);
-      double n2 = double.parse(operaciones[index + 1]);
-      double resultado = n1 * n2;
+    while (operaciones.contains('*') || operaciones.contains('/')) {
+      for (int operacion = 0; operacion < operaciones.length; operacion++) {
+        if (operaciones[operacion] == "*") {
+          n1 = double.parse(operaciones[operacion - 1]);
+          n2 = double.parse(operaciones[operacion + 1]);
+          double resultado = n1 * n2;
 
-      operaciones.removeAt(index + 1);
-      operaciones.removeAt(index);
-      operaciones.removeAt(index - 1);
-      operaciones.insert(index - 1, resultado.toString());
-      resultadoFinal = double.parse(operaciones[0]);
-    }
+          operaciones.removeAt(operacion + 1);
+          operaciones.removeAt(operacion);
+          operaciones.removeAt(operacion - 1);
+          operaciones.insert(operacion - 1, resultado.toString());
+          resultadoFinal = double.parse(operaciones[0]);
+        } else if (operaciones[operacion] == "/") {
+          double n1 = double.parse(operaciones[operacion - 1]);
+          double n2 = double.parse(operaciones[operacion + 1]);
+          if (n2 == 0) {
+            print("Division by zero is not allowed.");
+            agregarOperacion("$operacion = Error: Division by zero");
+            break;
+          }
+          double resultado = n1 / n2;
 
-    // division
-    while (operaciones.contains('/')) {
-      int index = operaciones.indexOf('/');
-
-      double n1 = double.parse(operaciones[index - 1]);
-      double n2 = double.parse(operaciones[index + 1]);
-
-      if (n2 == 0) {
-        print("Division by zero is not allowed.");
-        agregarOperacion("$operacion = Error: Division by zero");
-        break;
+          operaciones.removeAt(operacion + 1);
+          operaciones.removeAt(operacion);
+          operaciones.removeAt(operacion - 1);
+          operaciones.insert(operacion - 1, resultado.toString());
+          resultadoFinal = double.parse(operaciones[0]);
+        }
       }
-      double resultado = n1 / n2;
-
-      operaciones.removeAt(index + 1);
-      operaciones.removeAt(index);
-      operaciones.removeAt(index - 1);
-      operaciones.insert(index - 1, resultado.toString());
-      resultadoFinal = double.parse(operaciones[0]);
     }
 
     // suma
-    while (operaciones.contains('+')) {
-      int index = operaciones.indexOf('+');
-      double n1 = double.parse(operaciones[index - 1]);
-      double n2 = double.parse(operaciones[index + 1]);
-      double resultado = n1 + n2;
+    while (operaciones.contains('+') || operaciones.contains('-')) {
+      for (int operacion = 0; operacion < operaciones.length; operacion++) {
+        if (operaciones[operacion] == '+') {
+          double n1 = double.parse(operaciones[operacion - 1]);
+          double n2 = double.parse(operaciones[operacion + 1]);
+          double resultado = n1 + n2;
 
-      operaciones.removeAt(index + 1);
-      operaciones.removeAt(index);
-      operaciones.removeAt(index - 1);
-      operaciones.insert(index - 1, resultado.toString());
-      resultadoFinal = double.parse(operaciones[0]);
-    }
+          operaciones.removeAt(operacion + 1);
+          operaciones.removeAt(operacion);
+          operaciones.removeAt(operacion - 1);
+          operaciones.insert(operacion - 1, resultado.toString());
+          resultadoFinal = double.parse(operaciones[0]);
+        } else if (operaciones[operacion] == '-') {
+          double n1 = double.parse(operaciones[operacion - 1]);
+          double n2 = double.parse(operaciones[operacion + 1]);
+          double resultado = n1 - n2;
 
-    // resta
-    while (operaciones.contains('-')) {
-      int index = operaciones.indexOf('-');
-      double n1 = double.parse(operaciones[index - 1]);
-      double n2 = double.parse(operaciones[index + 1]);
-      double resultado = n1 - n2;
-
-      operaciones.removeAt(index + 1);
-      operaciones.removeAt(index);
-      operaciones.removeAt(index - 1);
-      operaciones.insert(index - 1, resultado.toString());
-      resultadoFinal = double.parse(operaciones[0]);
+          operaciones.removeAt(operacion + 1);
+          operaciones.removeAt(operacion);
+          operaciones.removeAt(operacion - 1);
+          operaciones.insert(operacion - 1, resultado.toString());
+          resultadoFinal = double.parse(operaciones[0]);
+        }
+      }
     }
 
     operacion += ' = $resultadoFinal';
