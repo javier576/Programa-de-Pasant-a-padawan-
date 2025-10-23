@@ -53,7 +53,6 @@ class NotificationService {
           priority: Priority.high,
         );
 
-    // --- AÑADIDO: Detalles iOS ---
     const DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
       presentAlert: true,
       presentBadge: true,
