@@ -19,6 +19,12 @@ const List<Destination> destinations = <Destination>[
     Icon(Icons.circle_notifications_outlined),
     Icon(Icons.circle_notifications),
   ),
+  Destination(
+    'Programar Agenda',
+    Icon(Icons.assignment_outlined),
+    Icon(Icons.assignment),
+  ),
+  Destination('Agenda', Icon(Icons.event_outlined), Icon(Icons.event)),
 ];
 
 class Menunavegacion extends StatelessWidget {

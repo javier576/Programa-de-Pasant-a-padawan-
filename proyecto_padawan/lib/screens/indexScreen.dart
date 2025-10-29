@@ -4,11 +4,14 @@ import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:proyecto_padawan/components/menuNavegacion.dart';
+import 'package:proyecto_padawan/pages/agendaPage.dart';
 import 'package:proyecto_padawan/pages/customPaintPage.dart';
 import 'package:proyecto_padawan/pages/indexPage.dart';
 import 'package:proyecto_padawan/pages/notificacionesPushPage.dart';
-//import 'package:proyecto_padawan/src/providers/push_notification_provider.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:proyecto_padawan/pages/programarActividadPage.dart';
+import 'package:proyecto_padawan/src/providers/push_notification_provider.dart';
+
+import 'package:proyecto_padawan/services/notification_services.dart';
 
 class Indexscreen extends StatefulWidget {
   const Indexscreen({super.key});
@@ -19,110 +22,70 @@ class Indexscreen extends StatefulWidget {
 
 class _IndexscreenState extends State<Indexscreen> {
   int screenindex = 0;
-  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
-  final mensajeStreamController = StreamController<String>.broadcast();
+  StreamSubscription? _notificationClickSubscription;
 
-  Stream<String> get mensajes => mensajeStreamController.stream;
   late final List<Widget> pantallas = [
     const Indexpage(),
     const Custompaintpage(),
-    Notificacionespushpage(mensajeNotificacion: mensajeStreamController.stream),
+    Notificacionespushpage(
+      mensajeNotificacion: NotificationServices().payloadDisplayStream,
+    ),
+    const Programaractividadpage(),
+    const AgendaPage(),
   ];
 
-  void initializeLocalNotifications() async {
-    const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
-
-    const DarwinInitializationSettings initializationSettingsIOS =
-        DarwinInitializationSettings(
-          requestAlertPermission: true,
-          requestBadgePermission: true,
-          requestSoundPermission: true,
-        );
-
-    const InitializationSettings initializationSettings =
-        InitializationSettings(
-          android: initializationSettingsAndroid,
-          iOS: initializationSettingsIOS,
-        );
-    await flutterLocalNotificationsPlugin.initialize(
-      initializationSettings,
-      onDidReceiveNotificationResponse: (NotificationResponse response) {
-        print('Click en notificacion local');
-        handleNotificationClick(response.payload);
-      },
-    );
-
-    await flutterLocalNotificationsPlugin.initialize(initializationSettings);
-  }
-
-  void showLocalNotification(RemoteMessage message) async {
-    final String? title = message.notification?.title;
-    final String? body = message.notification?.body;
-    final String? payload = message.data['Mensaje'];
-    const AndroidNotificationDetails androidDetails =
-        AndroidNotificationDetails(
-          'high_importance_channel',
-          'High Importance Notifications',
-          channelDescription:
-              'Este canal se usa para notificaciones importantes.',
-          importance: Importance.max,
-          priority: Priority.high,
-          icon: '@mipmap/ic_launcher',
-        );
-
-    const DarwinNotificationDetails iosDetails = DarwinNotificationDetails();
-
-    const NotificationDetails notificationDetails = NotificationDetails(
-      android: androidDetails,
-      iOS: iosDetails,
-    );
-
-    await flutterLocalNotificationsPlugin.show(
-      message.hashCode,
-      title,
-      body,
-      notificationDetails,
-      payload: payload,
-    );
-  }
-
+  @override
   void initState() {
     super.initState();
-    initializeLocalNotifications();
-    //final pushProvider = PushNotificationProvider();
-    //pushProvider.initNotification();
+    PushNotificationProvider().initNotification();
+    _listenToNotificationClicks();
+    _setupFirebaseListeners();
+  }
 
+  void _listenToNotificationClicks() {
+    _notificationClickSubscription = NotificationServices()
+        .notificationClickStream
+        .listen((String payload) {
+          print('Clic LOCAL detectado: Navegando y pasando payload...');
+
+          if (mounted) {
+            setState(() {
+              screenindex = 2;
+            });
+          }
+
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              NotificationServices().sendPayloadToDisplay(payload);
+            }
+          });
+        });
+  }
+
+  void _setupFirebaseListeners() {
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      print('Mensaje mientras la app esta  abierta ');
-      print('Datos del mensaje: ${message.data}');
-      String argumento = 'no-data';
-
-      if (Platform.isAndroid) {
-        argumento = message.data['Mensaje'] ?? 'Datos no Encontrados';
-      }
-      mensajeStreamController.sink.add(argumento);
-
+      print('Mensaje mientras la app esta abierta ');
       if (message.notification != null) {
-        showLocalNotification(message);
-
-        print(
-          'El mensaje tambien contenia una notificacion: ${message.notification!.title}',
-        );
-      }
-
-      if (mounted) {
-        handleNotificationClick(argumento);
+        NotificationServices().showFirebaseNotification(message);
       }
     });
 
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      print('Mensaje mientras la app esta  en segundo plano');
-      print('Datos del mensaje: ${message.data}');
-      handleNotificationClick(message.data['Mensaje']);
+      print('Mensaje mientras la app esta en segundo plano');
+      final String? payload = message.data['Mensaje'];
+      if (payload != null) {
+        if (mounted) {
+          setState(() {
+            screenindex = 2;
+          });
+        }
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            NotificationServices().sendPayloadToDisplay(payload);
+          }
+        });
+      }
     });
-
     setupInteractedMessage();
   }
 
@@ -132,38 +95,32 @@ class _IndexscreenState extends State<Indexscreen> {
 
     if (initialMessage != null) {
       print('La app se abrio desde un estado TERMINADO por una notificacion:');
-      print('Datos del mensaje: ${initialMessage.data}');
-
-      handleNotificationClick(initialMessage.data['Mensaje']);
-    }
-  }
-
-  void handleNotificationClick(String? payload) {
-    print('Manejando clic de notificacion y navegando...');
-    final String argumento = payload ?? 'Datos no encontrados';
-
-    if (mounted) {
-      setState(() {
-        screenindex = 2;
-      });
-    }
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        mensajeStreamController.sink.add(argumento);
+      final String? payload = initialMessage.data['Mensaje'];
+      if (payload != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            setState(() {
+              screenindex = 2;
+            });
+            NotificationServices().sendPayloadToDisplay(payload);
+          }
+        });
       }
-    });
+    }
   }
 
   @override
   void dispose() {
-    mensajeStreamController.close();
+    _notificationClickSubscription?.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final String titulo = destinations[screenindex].label;
+
     return Scaffold(
-      appBar: AppBar(title: Text(destinations[screenindex].label)),
+      appBar: AppBar(title: Text(titulo)),
       drawer: Menunavegacion(
         selectedIndex: screenindex,
         onDestinationSelected: (int index) {
@@ -173,8 +130,20 @@ class _IndexscreenState extends State<Indexscreen> {
           Navigator.pop(context);
         },
       ),
-
       body: pantallas[screenindex],
     );
   }
+}
+
+const List<Destination> destinations = [
+  Destination(label: 'Inicio'),
+  Destination(label: 'Dibujo'),
+  Destination(label: 'Notificaciones'),
+  Destination(label: 'Programar'),
+  Destination(label: 'Agenda'),
+];
+
+class Destination {
+  final String label;
+  const Destination({required this.label});
 }
